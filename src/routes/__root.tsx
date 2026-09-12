@@ -103,7 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: GOOGLE_FONTS_LINK },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.svg`, type: "image/svg+xml" },
     ],
   }),
   shellComponent: RootShell,
@@ -146,7 +146,7 @@ function SiteHeader() {
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-2">
-          <div className="size-8 rounded-sm bg-primary" />
+          <BrandMark className="size-9" />
           <span className="font-display text-xl font-extrabold tracking-tighter uppercase">
             MFin504
           </span>
@@ -192,6 +192,16 @@ function SiteHeader() {
   );
 }
 
+function BrandMark({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 48 48" aria-hidden="true">
+      <rect width="48" height="48" rx="14" fill="#D33A2C" />
+      <path d="M13 32V23h6v9h-6Zm8 0V17h6v15h-6Zm8 0V11h6v21h-6Z" fill="white" />
+      <path d="m12 19 8-6 6 3 10-8" fill="none" stroke="#FFD8D1" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function NavLink({
   to,
   children,
@@ -218,7 +228,7 @@ function SiteFooter() {
     <footer className="border-t border-border bg-card px-6 py-12">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 md:flex-row">
         <div className="flex items-center gap-2">
-          <div className="size-6 rounded-sm bg-primary" />
+          <BrandMark className="size-7" />
           <span className="font-display text-lg font-extrabold tracking-tighter uppercase">
             MFin504
           </span>

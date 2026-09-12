@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import heroAsset from "@/assets/hero-home.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,7 +40,7 @@ function HomePage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                to="/contacto"
+                to="/solicitud-prestamo"
                 className="inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 Solicitar Crédito
@@ -59,8 +58,8 @@ function HomePage() {
           <div className="relative animate-fade-up-delayed">
             <div className="aspect-[4/5] w-full overflow-hidden rounded-2xl bg-stone-200 outline outline-1 -outline-offset-1 outline-black/5">
               <img
-                src={heroAsset.url}
-                alt="Asesor financiero revisando documentos en una oficina moderna en Tegucigalpa"
+                src={`${import.meta.env.BASE_URL}hero-financial-advisor.webp`}
+                alt="Emprendedora hondureña recibiendo asesoría financiera"
                 width={1200}
                 height={1400}
                 className="h-full w-full object-cover"
