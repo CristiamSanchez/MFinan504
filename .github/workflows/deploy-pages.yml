@@ -21,18 +21,20 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
-      - name: Configurar Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+        node-version: 24
 
       - name: Instalar dependencias
-        run: bun install --frozen-lockfile
+        run: npm install
 
       - name: Compilar sitio estático
         env:
           # URL pública de la aplicación web de Google Apps Script.
           # (Settings → Secrets and variables → Actions → New repository secret).
           VITE_APPS_SCRIPT_URL: ${{ secrets.VITE_APPS_SCRIPT_URL }}
-        run: bun run build
+        run: npm run build
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
