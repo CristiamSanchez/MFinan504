@@ -1,0 +1,208 @@
+{
+  "name": "MFin504 - Solicitud de Préstamo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "solicitud-prestamo",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - Nueva Solicitud",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-680, 0],
+      "webhookId": "solicitud-prestamo"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "cond-nombre",
+              "leftValue": "={{$json.body.nombreCompleto}}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            },
+            {
+              "id": "cond-email",
+              "leftValue": "={{$json.body.email}}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "validate-input",
+      "name": "Validar Datos",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-460, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "a1", "name": "solicitudId", "type": "string", "value": "={{$now.format('yyyyMMdd')}}-{{$json.body.identidad}}" },
+            { "id": "a2", "name": "fechaSolicitud", "type": "string", "value": "={{$now.format('dd/MM/yyyy HH:mm')}}" },
+            { "id": "a3", "name": "nombreCompleto", "type": "string", "value": "={{$json.body.nombreCompleto}}" },
+            { "id": "a4", "name": "identidad", "type": "string", "value": "={{$json.body.identidad}}" },
+            { "id": "a5", "name": "telefono", "type": "string", "value": "={{$json.body.telefono}}" },
+            { "id": "a6", "name": "email", "type": "string", "value": "={{$json.body.email}}" },
+            { "id": "a7", "name": "tipoCredito", "type": "string", "value": "={{$json.body.tipoCredito}}" },
+            { "id": "a8", "name": "montoSolicitado", "type": "number", "value": "={{$json.body.montoSolicitado}}" },
+            { "id": "a9", "name": "plazoMeses", "type": "number", "value": "={{$json.body.plazoMeses}}" },
+            { "id": "a10", "name": "ingresoMensual", "type": "number", "value": "={{$json.body.ingresoMensual}}" },
+            { "id": "a11", "name": "proposito", "type": "string", "value": "={{$json.body.proposito}}" },
+            { "id": "a12", "name": "estado", "type": "string", "value": "Pendiente de revisión" }
+          ]
+        }
+      },
+      "id": "format-data",
+      "name": "Formatear Solicitud",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-240, -120]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PON_AQUI_EL_ID_DE_TU_GOOGLE_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Solicitudes",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID Solicitud": "={{$json.solicitudId}}",
+            "Fecha": "={{$json.fechaSolicitud}}",
+            "Nombre": "={{$json.nombreCompleto}}",
+            "Identidad": "={{$json.identidad}}",
+            "Teléfono": "={{$json.telefono}}",
+            "Email": "={{$json.email}}",
+            "Tipo de Crédito": "={{$json.tipoCredito}}",
+            "Monto Solicitado": "={{$json.montoSolicitado}}",
+            "Plazo (meses)": "={{$json.plazoMeses}}",
+            "Ingreso Mensual": "={{$json.ingresoMensual}}",
+            "Propósito": "={{$json.proposito}}",
+            "Estado": "={{$json.estado}}"
+          }
+        }
+      },
+      "id": "google-sheets-append",
+      "name": "Registrar en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [0, -120],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PON_AQUI_TU_CREDENCIAL",
+          "name": "Google Sheets - MFin504"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$('Formatear Solicitud').item.json.email}}",
+        "subject": "Hemos recibido tu solicitud de préstamo — MFin504",
+        "emailFormat": "html",
+        "message": "=<h2>Gracias por tu solicitud, {{$('Formatear Solicitud').item.json.nombreCompleto}}</h2><p>Recibimos tu solicitud de <strong>{{$('Formatear Solicitud').item.json.tipoCredito}}</strong> por un monto de <strong>L. {{$('Formatear Solicitud').item.json.montoSolicitado}}</strong> a <strong>{{$('Formatear Solicitud').item.json.plazoMeses}} meses</strong>.</p><p><strong>N.º de solicitud:</strong> {{$('Formatear Solicitud').item.json.solicitudId}}<br><strong>Fecha:</strong> {{$('Formatear Solicitud').item.json.fechaSolicitud}}</p><p>Un asesor de MFin504 revisará tu solicitud y se pondrá en contacto contigo pronto.</p><p>— Equipo MFin504</p>",
+        "options": {}
+      },
+      "id": "email-cliente",
+      "name": "Enviar Comprobante al Cliente",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [240, -220],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PON_AQUI_TU_CREDENCIAL",
+          "name": "Gmail - MFin504"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "solicitudes@mfin504.com",
+        "subject": "=Nueva solicitud de préstamo — {{$('Formatear Solicitud').item.json.nombreCompleto}}",
+        "emailFormat": "html",
+        "message": "=<h2>Nueva solicitud de préstamo recibida</h2><ul><li><strong>N.º solicitud:</strong> {{$('Formatear Solicitud').item.json.solicitudId}}</li><li><strong>Nombre:</strong> {{$('Formatear Solicitud').item.json.nombreCompleto}}</li><li><strong>Identidad:</strong> {{$('Formatear Solicitud').item.json.identidad}}</li><li><strong>Teléfono:</strong> {{$('Formatear Solicitud').item.json.telefono}}</li><li><strong>Email:</strong> {{$('Formatear Solicitud').item.json.email}}</li><li><strong>Tipo de crédito:</strong> {{$('Formatear Solicitud').item.json.tipoCredito}}</li><li><strong>Monto:</strong> L. {{$('Formatear Solicitud').item.json.montoSolicitado}}</li><li><strong>Plazo:</strong> {{$('Formatear Solicitud').item.json.plazoMeses}} meses</li><li><strong>Ingreso mensual:</strong> L. {{$('Formatear Solicitud').item.json.ingresoMensual}}</li><li><strong>Propósito:</strong> {{$('Formatear Solicitud').item.json.proposito}}</li></ul><p>Revisar y dar seguimiento en la hoja de cálculo.</p>",
+        "options": {}
+      },
+      "id": "email-staff",
+      "name": "Notificar al Personal",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [240, -20],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PON_AQUI_TU_CREDENCIAL",
+          "name": "Gmail - MFin504"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true, \"solicitudId\": $('Formatear Solicitud').item.json.solicitudId } }}",
+        "options": {}
+      },
+      "id": "respond-success",
+      "name": "Responder OK al Formulario",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [480, -120]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": false, \"error\": \"Faltan datos obligatorios (nombre o email)\" } }}",
+        "options": { "responseCode": 400 }
+      },
+      "id": "respond-error",
+      "name": "Responder Error de Validación",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [-240, 120]
+    }
+  ],
+  "connections": {
+    "Webhook - Nueva Solicitud": {
+      "main": [[{ "node": "Validar Datos", "type": "main", "index": 0 }]]
+    },
+    "Validar Datos": {
+      "main": [
+        [{ "node": "Formatear Solicitud", "type": "main", "index": 0 }],
+        [{ "node": "Responder Error de Validación", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formatear Solicitud": {
+      "main": [[{ "node": "Registrar en Google Sheets", "type": "main", "index": 0 }]]
+    },
+    "Registrar en Google Sheets": {
+      "main": [
+        [
+          { "node": "Enviar Comprobante al Cliente", "type": "main", "index": 0 },
+          { "node": "Notificar al Personal", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Enviar Comprobante al Cliente": {
+      "main": [[{ "node": "Responder OK al Formulario", "type": "main", "index": 0 }]]
+    },
+    "Notificar al Personal": {
+      "main": [[{ "node": "Responder OK al Formulario", "type": "main", "index": 0 }]]
+    }
+  }
+}
